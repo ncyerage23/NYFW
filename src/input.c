@@ -158,7 +158,10 @@ void handle_event(struct input_event* ev)
 {
 	if (ev->type == EV_KEY) {
 		
-		if (ev->code >= KEY_ESC && ev->code <= KEY_MAX) {	// on the keyboard
+		// TODO: this is very poorly organized, so I definitely need to fix it up.
+		// I changed it from KEY_MAX to KEY_MICMUTE because MAX has mouse buttons included, so yeah. 
+		
+		if (ev->code >= KEY_ESC && ev->code <= KEY_MICMUTE) {	// on the keyboard
 			
 			NYFW_Key k = linux_to_nyfw[ev->code];
 			if (k == NYFW_KEY_NONE) return;	

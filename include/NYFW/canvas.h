@@ -33,6 +33,7 @@ typedef struct {
 	// CANV_NULL is a NULL representation of a canvas, for returns in later functions. 
 #define CANV_PIXEL(oc, x, y)	(oc).pixels[(y)*(oc).stride + (x)]
 #define CANV_NULL		((NYFW_Canvas){0})
+#define CANV_IN_BOUNDS(oc, x, y)	( 0 <= (x) && (x) < (oc).width && 0 <= (y) && (y) < (oc).height ) ? 1 : 0
 
 	// A representation of a rectangle, for use in blitting and subcanvas operations. 
 	// Just a nice wrapper for that data. 
@@ -73,8 +74,27 @@ void nyfw_canvasFill(NYFW_Canvas oc, uint16_t color, NYFW_Rect* r);	// fills w/ 
 	// A safe version of the CANV_PIXEL macro. 
 uint16_t* nyfw_canvasPixel(NYFW_Canvas oc, int x, int y);	
 
-void nyfw_canvSetPixel(NYFW_Canvas oc, int x, int y, uint16_t color);
-uint16_t nyfw_canvGetPixel(NYFW_Canvas oc, int x, int y);
+
+
+static inline void nyfw_canvSetPixel(NYFW_Canvas oc, int x, int y, uint16_t color)
+{
+	if (CANV_IN_BOUNDS(oc, x, y)) CANV_PIXEL(oc, x, y) = color;
+}
+
+static inline uint16_t nyfw_canvGetPixel(NYFW_Canvas oc, int x, int y)
+{
+	if (CANV_IN_BOUNDS(oc, x, y)) return CANV_PIXEL(oc, x, y);
+	return 0;
+}
+
+static inline int nyfw_inRect(NYFW_Rect r, int x, int y)
+{
+	if (x < r.x || y < r.y) return 0;
+	if (r.x + r.w <= x || r.y + r.h <= y) return 0;
+	return 1;
+}
+
+
 
 // scales up a canvas, returning a larger one. Single scale value 
 NYFW_Canvas nyfw_canvasScaleUp(NYFW_Canvas oc, int scale);

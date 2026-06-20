@@ -44,16 +44,11 @@ int nyfw_clipRect(NYFW_Canvas oc, NYFW_Rect* r)
 	if (oc.pixels == NULL) return 0;
 	if (r->w <= 0 || r->h <= 0) return 0;
 
-	int x1, y1, x2, y2;
-	x1 = CMAX(r->x, 0);			y1 = CMAX(r->y, 0);
-	x2 = CMIN(r->x + r->w, oc.width);	y2 = CMIN(r->y + r->h, oc.height);		
-
-	int w, h;
-	w = x2 - x1;	h = y2 - y1;
-	if (w <= 0 || h <= 0) return 0;
+	r->x = CMAX(0, r->x);
+	r->y = CMAX(0, r->y);
+	r->w = (r->x + r->w < oc.width) ? r->w : oc.width - r->x;
+	r->h = (r->y + r->h < oc.height) ? r->h : oc.height - r->y;
 	
-	r->x = x1;	r->y = y1;
-	r->w = w;	r->h = h;
 	return 1;
 }
 
@@ -144,14 +139,14 @@ void nyfw_canvasFill(NYFW_Canvas oc, uint16_t color, NYFW_Rect* r)
 	} else {
 		NYFW_Rect nr = *r;
 		nyfw_clipRect(oc, &nr);
-		x = r->x;
-		y = r->y;
-		w = r->w;
-		h = r->h;
+		x = nr.x;
+		y = nr.y;
+		w = nr.w;
+		h = nr.h;
 	}
 
-	for (int i = 0; i < w; i++)
-		for (int j = 0; j < h; j++)
+	for (int j = 0; j < h; j++)
+		for (int i = 0; i < w; i++)
 			CANV_PIXEL(oc, x+i, y+j) = color;
 }
 
@@ -161,18 +156,6 @@ uint16_t* nyfw_canvasPixel(NYFW_Canvas oc, int x, int y)
 {
 	if (nyfw_canvInBounds(oc, x, y)) return &CANV_PIXEL(oc, x, y);
 	return NULL;
-}
-
-
-void nyfw_canvSetPixel(NYFW_Canvas oc, int x, int y, uint16_t color)
-{
-	if (nyfw_canvInBounds(oc, x, y)) CANV_PIXEL(oc, x, y) = color;
-}
-
-uint16_t nyfw_canvGetPixel(NYFW_Canvas oc, int x, int y)
-{
-	if (nyfw_canvInBounds(oc, x, y)) return CANV_PIXEL(oc, x, y);
-	return 0;
 }
 
 
